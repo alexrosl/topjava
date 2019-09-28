@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class UserMealsUtil {
     public static void main(String[] args) {
@@ -20,9 +21,11 @@ public class UserMealsUtil {
                 new UserMeal(LocalDateTime.of(2015, Month.MAY, 31,20,0), "Ужин", 510)
         );
         List<UserMealWithExceed> userMealWithExceeds=getFilteredWithExceeded(mealList, LocalTime.of(7, 0), LocalTime.of(12,0), 2000);
-        for (UserMealWithExceed userMealWithExceed : userMealWithExceeds){
-            System.out.println(userMealWithExceed);
-        }
+        userMealWithExceeds.stream()
+                .forEach(System.out::println);
+        userMealWithExceeds=getFilteredWithExceededOptional(mealList, LocalTime.of(7, 0), LocalTime.of(12,0), 2000);
+        userMealWithExceeds.stream()
+                .forEach(System.out::println);
     }
 
     public static List<UserMealWithExceed>  getFilteredWithExceeded(List<UserMeal> mealList, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
@@ -39,6 +42,19 @@ public class UserMealsUtil {
                 result.add(userMealWithExceed);
             }
         }
+        return result;
+    }
+
+    public static List<UserMealWithExceed>  getFilteredWithExceededOptional(List<UserMeal> mealList, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
+        Map<LocalDate,Integer> agrCaloriesPerDay = mealList.stream()
+                .collect(Collectors.groupingBy((o->o.getDateTime().toLocalDate()),Collectors.summingInt(UserMeal::getCalories)));
+        List<UserMealWithExceed> result = mealList.stream()
+                .filter(o -> TimeUtil.isBetween(o.getDateTime(),startTime,endTime))
+                .map(o -> new UserMealWithExceed(o.getDateTime(),
+                        o.getDescription(),
+                        o.getCalories(),
+                        agrCaloriesPerDay.getOrDefault(o.getLocalDate(),0)>caloriesPerDay))
+                .collect(Collectors.toList());
         return result;
     }
 }
