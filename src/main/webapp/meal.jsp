@@ -12,11 +12,11 @@
 <jsp:useBean id="meal" scope="request" type="ru.javawebinar.topjava.model.Meal"/>
 <form method="post" action="meals">
     <input type="hidden" name="mealId" value="${meal.id}"/>
-    <input type="datetime-local" name="dateTime" value="${meal.dateTime}"/>
+    <input type="datetime-local" name="dateTime" value="${meal.dateTime}" required/>
     <hr>
-    <input type="text" name="description" value="${meal.description}"/>
+    <input type="text" name="description" value="${meal.description}" required/>
     <hr>
-    <input type="number" name="calories" value="${meal.calories}"/>
+    <input type="number" name="calories" value="${meal.calories}" required/>
     <hr>
     <input type="submit" value="Submit"/>
 </form>

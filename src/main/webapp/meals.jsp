@@ -19,14 +19,7 @@
         <th colspan="2"></th>
     </tr>
     <c:forEach var="meal" items="${meals}">
-        <c:choose>
-            <c:when test="${meal.excess}">
-                <c:set var="lineColor" value="red"/>
-            </c:when>
-            <c:otherwise>
-                <c:set var="lineColor" value="green"/>
-            </c:otherwise>
-        </c:choose>
+        <c:set var="lineColor" value="${meal.excess ? 'red' : 'green'}"/>
         <tr style="color:${lineColor}">
             <td><javatime:format value="${meal.dateTime}" pattern="dd.MM.yyyy HH:mm"/></td>
             <td>${meal.description}</td>

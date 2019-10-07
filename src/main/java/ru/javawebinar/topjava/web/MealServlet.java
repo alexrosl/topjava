@@ -2,7 +2,7 @@ package ru.javawebinar.topjava.web;
 
 import org.slf4j.Logger;
 import ru.javawebinar.topjava.dao.MealDao;
-import ru.javawebinar.topjava.dao.SimpleMealDaoImpl;
+import ru.javawebinar.topjava.dao.LocalMealDaoImpl;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.model.MealTo;
 import ru.javawebinar.topjava.util.MealsUtil;
@@ -22,43 +22,49 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public class MealServlet extends HttpServlet {
     private static final Logger log = getLogger(MealServlet.class);
-    private final MealDao dao = SimpleMealDaoImpl.getInstance();
-    private static final String EDIT = "/meal.jsp";
-    private static final String ADD = "/addMeal.jsp";
+    private MealDao dao;
+    private static final String ADD_OR_EDIT = "/meal.jsp";
     private static final String LIST = "/meals.jsp";
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        dao = new LocalMealDaoImpl();
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         log.debug("redirect to meals");
         req.setCharacterEncoding("UTF-8");
         String action = req.getParameter("action");
+        action = action == null ? "list" : action;
         String forward = "";
-        if ("insert".equalsIgnoreCase(action)) {
-            forward = ADD;
-        } else if ("delete".equalsIgnoreCase(action)) {
-            int mealId = Integer.parseInt(req.getParameter("mealId"));
-            dao.delete(mealId);
-            List<MealTo> list = MealsUtil.getFiltered(dao.getAll(),
-                    LocalTime.MIN,
-                    LocalTime.MAX,
-                    MealsUtil.DEFAULT_CALORIES_PER_DAY);
-            req.setAttribute("meals", list);
-            forward = LIST;
-        } else if ("edit".equalsIgnoreCase(action)) {
-            int mealId = Integer.parseInt(req.getParameter("mealId"));
-            Meal meal = dao.getById(mealId);
-            req.setAttribute("meal", meal);
-            forward = EDIT;
-        } else {
-            List<MealTo> list = MealsUtil.getFiltered(dao.getAll(),
-                    LocalTime.MIN,
-                    LocalTime.MAX,
-                    MealsUtil.DEFAULT_CALORIES_PER_DAY);
-            req.setAttribute("meals", list);
-            forward = LIST;
+        switch (action.toLowerCase()) {
+            case ("insert"):
+                Meal meal = new Meal(null, null, 0);
+                req.setAttribute("meal", meal);
+                forward = ADD_OR_EDIT;
+                break;
+            case ("delete"):
+                int mealId = Integer.parseInt(req.getParameter("mealId"));
+                dao.delete(mealId);
+                resp.sendRedirect("meals");
+                break;
+            case ("edit"):
+                mealId = Integer.parseInt(req.getParameter("mealId"));
+                meal = dao.getById(mealId);
+                req.setAttribute("meal", meal);
+                forward = ADD_OR_EDIT;
+                break;
+            default:
+                List<MealTo> list = MealsUtil.getFiltered(dao.getAll(),
+                        LocalTime.MIN,
+                        LocalTime.MAX,
+                        MealsUtil.DEFAULT_CALORIES_PER_DAY);
+                req.setAttribute("meals", list);
+                forward = LIST;
         }
-
-        req.getRequestDispatcher(forward).forward(req, resp);
+        if (!"delete".equalsIgnoreCase(action)) req.getRequestDispatcher(forward).forward(req, resp);
     }
 
     @Override
@@ -73,19 +79,11 @@ public class MealServlet extends HttpServlet {
         String description = req.getParameter("description");
         int calories = Integer.parseInt(req.getParameter("calories"));
         LocalDateTime localDateTime = TimeUtil.parseLocalDateTime(req.getParameter("dateTime"));
-        Meal meal;
-        if (mealId != 0) {
-            meal = dao.getById(mealId);
-            meal.setCalories(calories);
-            meal.setDateTime(localDateTime);
-            meal.setDescription(description);
-            dao.update(meal);
-        } else {
-            meal = new Meal(localDateTime,
-                    description,
-                    calories);
-            dao.add(meal);
-        }
+        Meal meal = new Meal(mealId,
+                localDateTime,
+                description,
+                calories);
+        dao.update(meal);
         List<MealTo> list = MealsUtil.getFiltered(dao.getAll(),
                 LocalTime.MIN,
                 LocalTime.MAX,
