@@ -10,23 +10,18 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class LocalMealDaoImpl implements MealDao {
+public class MealDaoInMemory implements MealDao {
 
     private Map<Integer, Meal> map = new ConcurrentHashMap<>();
     private AtomicInteger mealIdSequence = new AtomicInteger(1000);
 
-    public LocalMealDaoImpl() {
-        add(new Meal(getNextId(), LocalDateTime.of(2015, Month.MAY, 30, 10, 0), "Завтрак", 500));
-        add(new Meal(getNextId(), LocalDateTime.of(2015, Month.MAY, 30, 13, 0), "Обед", 1000));
-        add(new Meal(getNextId(), LocalDateTime.of(2015, Month.MAY, 30, 20, 0), "Ужин", 500));
-        add(new Meal(getNextId(), LocalDateTime.of(2015, Month.MAY, 31, 10, 0), "Завтрак", 1000));
-        add(new Meal(getNextId(), LocalDateTime.of(2015, Month.MAY, 31, 13, 0), "Обед", 500));
-        add(new Meal(getNextId(), LocalDateTime.of(2015, Month.MAY, 31, 20, 0), "Ужин", 510));
-    }
-
-    @Override
-    public Meal add(Meal meal) {
-        return update(meal);
+    public MealDaoInMemory() {
+        save(new Meal(getNextId(), LocalDateTime.of(2015, Month.MAY, 30, 10, 0), "Завтрак", 500));
+        save(new Meal(getNextId(), LocalDateTime.of(2015, Month.MAY, 30, 13, 0), "Обед", 1000));
+        save(new Meal(getNextId(), LocalDateTime.of(2015, Month.MAY, 30, 20, 0), "Ужин", 500));
+        save(new Meal(getNextId(), LocalDateTime.of(2015, Month.MAY, 31, 10, 0), "Завтрак", 1000));
+        save(new Meal(getNextId(), LocalDateTime.of(2015, Month.MAY, 31, 13, 0), "Обед", 500));
+        save(new Meal(getNextId(), LocalDateTime.of(2015, Month.MAY, 31, 20, 0), "Ужин", 510));
     }
 
     @Override
@@ -35,7 +30,7 @@ public class LocalMealDaoImpl implements MealDao {
     }
 
     @Override
-    public Meal update(Meal meal) {
+    public Meal save(Meal meal) {
         if (meal.isNew()) meal.setId(getNextId());
         return map.put(meal.getId(), meal);
     }

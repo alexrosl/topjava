@@ -2,7 +2,7 @@ package ru.javawebinar.topjava.web;
 
 import org.slf4j.Logger;
 import ru.javawebinar.topjava.dao.MealDao;
-import ru.javawebinar.topjava.dao.LocalMealDaoImpl;
+import ru.javawebinar.topjava.dao.MealDaoInMemory;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.model.MealTo;
 import ru.javawebinar.topjava.util.MealsUtil;
@@ -29,7 +29,7 @@ public class MealServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        dao = new LocalMealDaoImpl();
+        dao = new MealDaoInMemory();
     }
 
     @Override
@@ -49,7 +49,7 @@ public class MealServlet extends HttpServlet {
                 int mealId = Integer.parseInt(req.getParameter("mealId"));
                 dao.delete(mealId);
                 resp.sendRedirect("meals");
-                break;
+                return;
             case ("edit"):
                 mealId = Integer.parseInt(req.getParameter("mealId"));
                 meal = dao.getById(mealId);
@@ -64,7 +64,7 @@ public class MealServlet extends HttpServlet {
                 req.setAttribute("meals", list);
                 forward = LIST;
         }
-        if (!"delete".equalsIgnoreCase(action)) req.getRequestDispatcher(forward).forward(req, resp);
+        req.getRequestDispatcher(forward).forward(req, resp);
     }
 
     @Override
@@ -83,12 +83,7 @@ public class MealServlet extends HttpServlet {
                 localDateTime,
                 description,
                 calories);
-        dao.update(meal);
-        List<MealTo> list = MealsUtil.getFiltered(dao.getAll(),
-                LocalTime.MIN,
-                LocalTime.MAX,
-                MealsUtil.DEFAULT_CALORIES_PER_DAY);
-        req.setAttribute("meals", list);
-        req.getRequestDispatcher(LIST).forward(req, resp);
+        dao.save(meal);
+        resp.sendRedirect("meals");
     }
 }
