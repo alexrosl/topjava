@@ -16,12 +16,12 @@ public class MealDaoInMemory implements MealDao {
     private AtomicInteger mealIdSequence = new AtomicInteger(1000);
 
     public MealDaoInMemory() {
-        save(new Meal(getNextId(), LocalDateTime.of(2015, Month.MAY, 30, 10, 0), "Завтрак", 500));
-        save(new Meal(getNextId(), LocalDateTime.of(2015, Month.MAY, 30, 13, 0), "Обед", 1000));
-        save(new Meal(getNextId(), LocalDateTime.of(2015, Month.MAY, 30, 20, 0), "Ужин", 500));
-        save(new Meal(getNextId(), LocalDateTime.of(2015, Month.MAY, 31, 10, 0), "Завтрак", 1000));
-        save(new Meal(getNextId(), LocalDateTime.of(2015, Month.MAY, 31, 13, 0), "Обед", 500));
-        save(new Meal(getNextId(), LocalDateTime.of(2015, Month.MAY, 31, 20, 0), "Ужин", 510));
+        save(new Meal(LocalDateTime.of(2015, Month.MAY, 30, 10, 0), "Завтрак", 500));
+        save(new Meal(LocalDateTime.of(2015, Month.MAY, 30, 13, 0), "Обед", 1000));
+        save(new Meal(LocalDateTime.of(2015, Month.MAY, 30, 20, 0), "Ужин", 500));
+        save(new Meal(LocalDateTime.of(2015, Month.MAY, 31, 10, 0), "Завтрак", 1000));
+        save(new Meal(LocalDateTime.of(2015, Month.MAY, 31, 13, 0), "Обед", 500));
+        save(new Meal(LocalDateTime.of(2015, Month.MAY, 31, 20, 0), "Ужин", 510));
     }
 
     @Override
@@ -31,8 +31,11 @@ public class MealDaoInMemory implements MealDao {
 
     @Override
     public Meal save(Meal meal) {
-        if (meal.isNew()) meal.setId(getNextId());
-        return map.put(meal.getId(), meal);
+        if (meal.isNew()) {
+            meal.setId(getNextId());
+            return map.put(meal.getId(),meal);
+        }
+        return map.replace(meal.getId(), meal);
     }
 
     @Override
