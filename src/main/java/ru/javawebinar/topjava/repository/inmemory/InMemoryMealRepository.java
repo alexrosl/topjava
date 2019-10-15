@@ -21,12 +21,12 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Repository
 public class InMemoryMealRepository implements MealRepository {
     private static final Logger log = getLogger(InMemoryMealRepository.class);
-    private Map<Integer, Meal> repository = new ConcurrentHashMap<>();
+    private Map<Integer, Map<Integer, Meal>> repository = new ConcurrentHashMap<>();
     private AtomicInteger counter = new AtomicInteger(0);
 
     //{
-    //    MealsUtil.MEALS.forEach(this::save);
-    // }
+    //    MealsUtil.MEALS.forEach(m -> this.save(m, m.getUserId()));
+    //}
 
     @Override
     public Meal save(Meal meal, int userId) {
@@ -34,67 +34,74 @@ public class InMemoryMealRepository implements MealRepository {
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
             meal.setUserId(userId);
-            repository.put(meal.getId(), meal);
+            usersMeal(userId).put(meal.getId(), meal);
             return meal;
         }
         // treat case: update, but not present in storage
-        if (repository.get(meal.getId()).getUserId() != userId) {
-            log.info("meal {} not for user id {}", meal, userId);
+        if (!isPresent(meal.getId(), userId)) {
             return null;
         } else {
             meal.setUserId(userId);
-            return repository.computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
+            return usersMeal(userId).put(meal.getId(), meal);
         }
     }
 
     @Override
     public boolean delete(int id, int userId) {
         log.info("delete {} for userId {}", id, userId);
-        Meal meal = repository.get(id);
-        if (meal == null) {
-            return false;
-        } else if (meal.getUserId() != userId) {
-            log.info("meal with id {} not for user id {}", id, userId);
+        if (!isPresent(id, userId)) {
             return false;
         } else {
-            return repository.remove(id) != null;
+            return usersMeal(userId).remove(id) != null;
         }
     }
 
     @Override
     public Meal get(int id, int userId) {
         log.info("get {} for userId {}", id, userId);
-        Meal meal = repository.get(id);
-        if (meal == null) {
-            log.info("meal with id {} not found", id);
-            return null;
-        } else if (meal.getUserId() != userId) {
-            log.info("meal with id {} not for user id {}", id, userId);
+        if (!isPresent(id, userId)) {
             return null;
         } else {
-            return meal;
+            return usersMeal(userId).get(id);
         }
     }
 
     @Override
-    public List<MealTo> getList(int userId, int caloriesPerDay, LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime) {
+    public List<Meal> getAll(int userId) {
+        return getFiltered(LocalDate.MIN, LocalDate.MAX, userId);
+    }
+
+    @Override
+    public List<Meal> getFiltered(LocalDate startDate, LocalDate endDate, int userId) {
         log.info("get all for userId {}", userId);
         LocalDate sd = startDate == null ? LocalDate.MIN : startDate;
         LocalDate ed = endDate == null ? LocalDate.MAX : endDate;
-        LocalTime st = startTime == null ? LocalTime.MIN : startTime;
-        LocalTime et = endTime == null ? LocalTime.MAX : endTime;
-        Map<LocalDate, Integer> caloriesSumByDate = repository.values().stream()
-                .collect(
-                        Collectors.groupingBy(Meal::getDate, Collectors.summingInt(Meal::getCalories))
-                );
-        return repository.values()
+        return usersMeal(userId)
+                .values()
                 .stream()
-                .filter(m -> m.getUserId() == userId)
-                .filter(m -> DateTimeUtil.isBetween(m.getDate(), sd, ed) &&
-                        DateTimeUtil.isBetween(m.getTime(), st, et))
+                .filter(m -> DateTimeUtil.isBetween(m.getDate(), startDate, endDate))
                 .sorted((m1, m2) -> m2.getDateTime().compareTo(m1.getDateTime()))
-                .map(m -> MealsUtil.createTo(m, caloriesSumByDate.get(m.getDate()) > caloriesPerDay))
                 .collect(Collectors.toList());
+    }
+
+    private boolean isPresent(int id, int userId) {
+        boolean result = false;
+        try {
+            result = usersMeal(userId).get(id) != null;
+        } catch (NullPointerException e) {
+        }
+        if (!result) {
+            log.info("meal with id={} not found for userId={}", id, userId);
+        }
+        return result;
+    }
+
+    private Map<Integer, Meal> usersMeal(int userId) {
+        Map<Integer, Meal> mapMeal = repository.get(userId);
+        if (mapMeal == null) {
+            repository.put(userId, new ConcurrentHashMap<>());
+        }
+        return repository.get(userId);
     }
 }
 

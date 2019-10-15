@@ -47,8 +47,7 @@ public class InMemoryUserRepository implements UserRepository {
         log.info("getAll");
         return repository.values()
                 .stream()
-                .sorted((u1, u2) -> u1.getName().compareToIgnoreCase(u2.getName()))
-                .sorted(Comparator.comparingInt(AbstractBaseEntity::getId))
+                .sorted((u1, u2) -> u1.getName().compareToIgnoreCase(u2.getName()) == 0 ? u1.getId().compareTo(u2.getId()) : u1.getName().compareToIgnoreCase(u2.getName()))
                 .collect(Collectors.toList());
     }
 

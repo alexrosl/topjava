@@ -60,10 +60,6 @@ public class MealServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
-        String userId = request.getParameter("userId");
-        if (userId != null && !userId.isEmpty()) {
-            SecurityUtil.setAuthUserId(Integer.parseInt(userId));
-        }
         switch (action == null ? "all" : action) {
             case "delete":
                 Integer id = getId(request);
@@ -82,16 +78,12 @@ public class MealServlet extends HttpServlet {
             case "all":
             default:
                 log.info("getAll");
-                String paramStartDate = request.getParameter("startDate");
-                String paramEndDate = request.getParameter("endDate");
-                String paramStartTime = request.getParameter("startTime");
-                String paramEndTime = request.getParameter("endTime");
-                LocalDate startDate = paramStartDate == null || paramStartDate.isEmpty() ? LocalDate.MIN : LocalDate.parse(paramStartDate);
-                LocalDate endDate = paramEndDate == null || paramEndDate.isEmpty() ? LocalDate.MAX : LocalDate.parse(paramEndDate);
-                LocalTime startTime = paramStartTime == null || paramStartTime.isEmpty() ? LocalTime.MIN : LocalTime.parse(paramStartTime);
-                LocalTime endTime = paramEndTime == null || paramEndTime.isEmpty() ? LocalTime.MAX : LocalTime.parse(paramEndTime);
+                String startDate = request.getParameter("startDate");
+                String endDate = request.getParameter("endDate");
+                String startTime = request.getParameter("startTime");
+                String endTime = request.getParameter("endTime");
                 request.setAttribute("meals",
-                        controller.getList(startDate, endDate, startTime, endTime));
+                        controller.getFiltered(startDate, endDate, startTime, endTime));
                 request.getRequestDispatcher("/meals.jsp").forward(request, response);
                 break;
         }
