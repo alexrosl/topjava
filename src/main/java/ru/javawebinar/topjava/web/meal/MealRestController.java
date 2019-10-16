@@ -26,7 +26,10 @@ public class MealRestController {
 
     public MealRestController(MealService service) {
         this.service = service;
-        MealsUtil.MEALS.forEach(m -> this.service.create(m, m.getUserId()));
+        MealsUtil.MEALS.forEach(m -> {
+            this.service.create(m, 1);
+            this.service.create(new Meal(null, m.getDateTime(), m.getDescription() + " (secord)", m.getCalories()), 2);
+        });
     }
 
     public List<MealTo> getAll() {

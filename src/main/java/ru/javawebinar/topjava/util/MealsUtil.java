@@ -20,18 +20,13 @@ public class MealsUtil {
     public static final int DEFAULT_CALORIES_PER_DAY = 2000;
 
     public static final List<Meal> MEALS = Arrays.asList(
-            new Meal(null, LocalDateTime.of(2015, Month.MAY, 30, 10, 0), "Завтрак", 500, authUserId()),
-            new Meal(null, LocalDateTime.of(2015, Month.MAY, 30, 13, 0), "Обед", 1000, authUserId()),
-            new Meal(null, LocalDateTime.of(2015, Month.MAY, 30, 20, 0), "Ужин", 500, authUserId()),
-            new Meal(null, LocalDateTime.of(2015, Month.MAY, 31, 10, 0), "Завтрак", 1000, authUserId()),
-            new Meal(null, LocalDateTime.of(2015, Month.MAY, 31, 13, 0), "Обед", 500, authUserId()),
-            new Meal(null, LocalDateTime.of(2015, Month.MAY, 31, 20, 0), "Ужин", 510, authUserId()),
-            new Meal(null, LocalDateTime.of(2015, Month.MAY, 30, 10, 0), "Завтрак (Second user)", 500, 2),
-            new Meal(null, LocalDateTime.of(2015, Month.MAY, 30, 13, 0), "Обед (Second user)", 1000, 2),
-            new Meal(null, LocalDateTime.of(2015, Month.MAY, 30, 20, 0), "Ужин (Second user)", 500, 2),
-            new Meal(null, LocalDateTime.of(2015, Month.MAY, 31, 10, 0), "Завтрак (Second user)", 1000, 2),
-            new Meal(null, LocalDateTime.of(2015, Month.MAY, 31, 13, 0), "Обед (Second user)", 500, 2),
-            new Meal(null, LocalDateTime.of(2015, Month.MAY, 31, 20, 0), "Ужин (Second user)", 510, 2)
+            new Meal(null, LocalDateTime.of(2015, Month.MAY, 30, 10, 0), "Завтрак", 500),
+            new Meal(null, LocalDateTime.of(2015, Month.MAY, 30, 13, 0), "Обед", 1000),
+            new Meal(null, LocalDateTime.of(2015, Month.MAY, 30, 20, 0), "Ужин", 500),
+            new Meal(null, LocalDateTime.of(2015, Month.MAY, 31, 10, 0), "Завтрак", 1000),
+            new Meal(null, LocalDateTime.of(2015, Month.MAY, 31, 13, 0), "Обед", 500),
+            new Meal(null, LocalDateTime.of(2015, Month.MAY, 31, 20, 0), "Ужин", 510)
+
     );
 
     public static List<MealTo> getTos(Collection<Meal> meals, int caloriesPerDay) {
