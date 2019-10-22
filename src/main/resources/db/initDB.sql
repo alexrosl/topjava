@@ -32,5 +32,6 @@ create table meals
     date_time timestamp not null,
     description varchar(255) not null,
     calories integer not null,
-    foreign key (user_id) references users (id) on delete cascade
+    foreign key (user_id) references users (id) on delete cascade,
+    constraint meal_date_time unique (user_id, date_time)
 );
