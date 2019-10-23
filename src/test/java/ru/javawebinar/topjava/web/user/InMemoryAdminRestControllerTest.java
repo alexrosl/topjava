@@ -33,10 +33,7 @@ public class InMemoryAdminRestControllerTest {
     @Before
     public void setUp() throws Exception {
         // re-initialize
-        InMemoryUserRepository repository = BeanFactoryAnnotationUtils.qualifiedBeanOfType(appCtx.getBeanFactory(),
-                InMemoryUserRepository.class,
-                "inmemoryUserRepository");
-        //appCtx.getBean(InMemoryUserRepository.class);
+        InMemoryUserRepository repository = appCtx.getBean(InMemoryUserRepository.class);
         repository.init();
     }
 
