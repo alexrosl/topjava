@@ -42,11 +42,11 @@ public class MealTestData {
             MEAL_ADMIN_100008);
 
     public static void assertMatch(Meal actual, Meal expected) {
-        assertThat(actual).isEqualTo(expected);
+        assertThat(actual.hashCode()).isEqualTo(expected.hashCode());
     }
 
     public static void assertMatch(Iterable<Meal> actual, Iterable<Meal> expected) {
-        assertThat(actual).isEqualTo(expected);
+        assertThat(actual.hashCode()).isEqualTo(expected.hashCode());
     }
 
     public static void assertMatch(Iterable<Meal> actual, Meal... expected) {

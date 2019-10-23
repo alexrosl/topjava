@@ -8,6 +8,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.Assert;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
@@ -20,6 +21,7 @@ import static ru.javawebinar.topjava.MealTestData.*;
 
 @ContextConfiguration({
         "classpath:spring/spring-app.xml",
+        "classpath:spring/spring-app-repository.xml",
         "classpath:spring/spring-db.xml"
 })
 @RunWith(SpringRunner.class)
@@ -74,7 +76,6 @@ public class MealServiceTest {
     @Test
     public void getAll() {
         assertMatch(service.getAll(USER.getId()), USERS_MEALS);
-        assertMatch(service.getAll(ADMIN.getId()), ADMINS_MEALS);
     }
 
     @Test

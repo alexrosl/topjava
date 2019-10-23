@@ -5,12 +5,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import ru.javawebinar.topjava.UserTestData;
 import ru.javawebinar.topjava.model.User;
-import ru.javawebinar.topjava.repository.UserRepository;
 import ru.javawebinar.topjava.repository.inmemory.InMemoryUserRepository;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
@@ -18,7 +16,7 @@ import java.util.Collection;
 
 import static ru.javawebinar.topjava.UserTestData.ADMIN;
 
-@ContextConfiguration("classpath:spring/spring-app-test.xml")
+@ContextConfiguration({"classpath:spring/spring-app-repository-test.xml", "classpath:spring/spring-app.xml"})
 @RunWith(SpringRunner.class)
 public class InMemoryAdminRestControllerSpringTest {
 
@@ -26,7 +24,7 @@ public class InMemoryAdminRestControllerSpringTest {
     private AdminRestController controller;
 
     @Autowired
-    private UserRepository repository;
+    private InMemoryUserRepository repository;
 
     @Before
     public void setUp() throws Exception {

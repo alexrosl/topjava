@@ -1,14 +1,12 @@
 package ru.javawebinar.topjava.web.user;
 
 import org.junit.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ru.javawebinar.topjava.UserTestData;
 import ru.javawebinar.topjava.model.User;
-import ru.javawebinar.topjava.repository.UserRepository;
 import ru.javawebinar.topjava.repository.inmemory.InMemoryUserRepository;
-import ru.javawebinar.topjava.service.UserService;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.util.Arrays;
@@ -17,19 +15,29 @@ import java.util.Collection;
 import static ru.javawebinar.topjava.UserTestData.ADMIN;
 
 public class InMemoryAdminRestControllerTest {
-    // static ConfigurableApplicationContext appCtx;
-    //private static AdminRestController controller;
+    private static ConfigurableApplicationContext appCtx;
+    private static AdminRestController controller;
 
-    private AdminRestController controller;
+    @BeforeClass
+    public static void beforeClass() {
+        appCtx = new ClassPathXmlApplicationContext("spring/spring-app-repository-test.xml", "spring/spring-app.xml");
+        System.out.println("\n" + Arrays.toString(appCtx.getBeanDefinitionNames()) + "\n");
+        controller = appCtx.getBean(AdminRestController.class);
+    }
 
-    private UserRepository repository;
+    @AfterClass
+    public static void afterClass() {
+        appCtx.close();
+    }
 
     @Before
     public void setUp() throws Exception {
-        repository = new InMemoryUserRepository();
+        // re-initialize
+        InMemoryUserRepository repository = BeanFactoryAnnotationUtils.qualifiedBeanOfType(appCtx.getBeanFactory(),
+                InMemoryUserRepository.class,
+                "inmemoryUserRepository");
+        //appCtx.getBean(InMemoryUserRepository.class);
         repository.init();
-        UserService service = new UserService(repository);
-        controller = new AdminRestController(service);
     }
 
     @Test
