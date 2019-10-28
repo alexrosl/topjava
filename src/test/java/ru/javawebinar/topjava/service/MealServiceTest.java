@@ -1,9 +1,13 @@
 package ru.javawebinar.topjava.service;
 
+import org.assertj.core.api.WritableAssertionInfo;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.Stopwatch;
 import org.junit.rules.TestName;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
@@ -15,9 +19,10 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
+import static org.slf4j.LoggerFactory.getLogger;
 import static ru.javawebinar.topjava.MealTestData.*;
 import static ru.javawebinar.topjava.UserTestData.ADMIN_ID;
 import static ru.javawebinar.topjava.UserTestData.USER_ID;
@@ -31,31 +36,34 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 @Transactional
 public class MealServiceTest {
 
+    private static final Logger log = getLogger(MealServiceTest.class);
+
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
 
     @Rule
     public TestName testName = new TestName();
 
-    public static List<String> list = new ArrayList<>();
+    @Rule
+    public Stopwatch stopwatch = new Stopwatch() {
+        @Override
+        protected void finished(long nanos, Description description) {
+            log.info("duration is {} milliseconds", nanos / 1000_000);
+            map.put(testName.getMethodName(), nanos / 1000_000);
+        }
+    };
 
-    public long start = 0;
-
-    @Before
-    public void before() {
-        start = System.currentTimeMillis();
-    }
-
-    @After
-    public void after() {
-        long duration = System.currentTimeMillis() - start;
-        System.out.println("duration = " + duration + " milliseconds");
-        list.add("Method " + testName.getMethodName() + " evaluating in " + duration + " milliseconds");
-    }
+    public static Map<String, Long> map = new HashMap<>();
 
     @AfterClass
     public static void afterClass() {
-        list.forEach(System.out::println);
+        StringBuilder builder = new StringBuilder();
+        builder.append("-----------------------\n")
+                .append(String.format(String.format("|%-15s|%5s|", "Method name", "mills")))
+                .append("\n----------------+------\n");
+        map.forEach((k, v) -> builder.append(String.format("|%-15s|%5d|", k, v)).append("\n"));
+        builder.append("-----------------------\n");
+        log.info("\n{}", builder.toString());
     }
 
     @Autowired

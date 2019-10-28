@@ -9,6 +9,10 @@ import ru.javawebinar.topjava.repository.MealRepository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.CriteriaUpdate;
+import javax.persistence.criteria.Root;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -28,20 +32,14 @@ public class JpaMealRepository implements MealRepository {
             em.flush();
             return meal;
         } else {
-            int result = em.createNamedQuery(Meal.UPDATE)
-                    .setParameter("dateTime", meal.getDateTime())
-                    .setParameter("description", meal.getDescription())
-                    .setParameter("calories", meal.getCalories())
-                    .setParameter("id", meal.getId())
-                    .setParameter("userId", userId)
-                    .executeUpdate();
-            if (result != 0) {
-                meal.setUser(em.getReference(User.class, userId));
-                em.flush();
-                return meal;
-            } else {
-                return null;
-            }
+            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaUpdate<Meal> update = builder.createCriteriaUpdate(Meal.class);
+            Root<Meal> mealRoot = update.from(Meal.class);
+            update.set("dateTime", meal.getDateTime());
+            update.set("description", meal.getDescription());
+            update.set("calories", meal.getCalories());
+            update.where(builder.equal(mealRoot.get("user").get("id"), userId), builder.equal(mealRoot.get("id"), meal.getId()));
+            return em.createQuery(update).executeUpdate() == 0 ? null : meal;
         }
     }
 
@@ -56,9 +54,12 @@ public class JpaMealRepository implements MealRepository {
 
     @Override
     public Meal get(int id, int userId) {
-        List<Meal> list = em.createNamedQuery(Meal.GET, Meal.class)
-                .setParameter("id", id)
-                .setParameter("userId", userId)
+        CriteriaBuilder builder = em.getCriteriaBuilder();
+        CriteriaQuery<Meal> criteriaQuery = builder.createQuery(Meal.class);
+        Root<Meal> mealRoot = criteriaQuery.from(Meal.class);
+        criteriaQuery.select(mealRoot)
+                .where(builder.equal(mealRoot.get("user").get("id"), userId), builder.equal(mealRoot.get("id"), id));
+        List<Meal> list = em.createQuery(criteriaQuery)
                 .getResultList();
         return DataAccessUtils.singleResult(list);
     }
