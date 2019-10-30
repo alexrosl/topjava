@@ -13,14 +13,17 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.annotation.Transactional;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
+import javax.validation.ConstraintViolationException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.slf4j.LoggerFactory.getLogger;
 import static ru.javawebinar.topjava.MealTestData.*;
@@ -48,8 +51,8 @@ public class MealServiceTest {
     public Stopwatch stopwatch = new Stopwatch() {
         @Override
         protected void finished(long nanos, Description description) {
-            log.info("duration is {} milliseconds", nanos / 1000_000);
-            map.put(testName.getMethodName(), nanos / 1000_000);
+            log.info("duration is {} milliseconds", TimeUnit.NANOSECONDS.toMillis(nanos));
+            map.put(testName.getMethodName(), TimeUnit.NANOSECONDS.toMillis(nanos));
         }
     };
 
@@ -58,11 +61,11 @@ public class MealServiceTest {
     @AfterClass
     public static void afterClass() {
         StringBuilder builder = new StringBuilder();
-        builder.append("-----------------------\n")
+        builder.append("\u001B[35m").append("-----------------------\n")
                 .append(String.format(String.format("|%-15s|%5s|", "Method name", "mills")))
                 .append("\n----------------+------\n");
         map.forEach((k, v) -> builder.append(String.format("|%-15s|%5d|", k, v)).append("\n"));
-        builder.append("-----------------------\n");
+        builder.append("-----------------------\n").append("\u001B[37m");
         log.info("\n{}", builder.toString());
     }
 

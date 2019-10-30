@@ -1,6 +1,5 @@
 package ru.javawebinar.topjava.repository.jpa;
 
-import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.javawebinar.topjava.model.Meal;
@@ -9,10 +8,6 @@ import ru.javawebinar.topjava.repository.MealRepository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.CriteriaUpdate;
-import javax.persistence.criteria.Root;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -29,17 +24,17 @@ public class JpaMealRepository implements MealRepository {
         if (meal.isNew()) {
             meal.setUser(em.getReference(User.class, userId));
             em.persist(meal);
-            em.flush();
             return meal;
         } else {
-            CriteriaBuilder builder = em.getCriteriaBuilder();
-            CriteriaUpdate<Meal> update = builder.createCriteriaUpdate(Meal.class);
-            Root<Meal> mealRoot = update.from(Meal.class);
-            update.set("dateTime", meal.getDateTime());
-            update.set("description", meal.getDescription());
-            update.set("calories", meal.getCalories());
-            update.where(builder.equal(mealRoot.get("user").get("id"), userId), builder.equal(mealRoot.get("id"), meal.getId()));
-            return em.createQuery(update).executeUpdate() == 0 ? null : meal;
+            Meal updatableMeal = get(meal.getId(),userId);
+            if (updatableMeal != null) {
+                updatableMeal.setDescription(meal.getDescription());
+                updatableMeal.setDateTime(meal.getDateTime());
+                updatableMeal.setCalories(meal.getCalories());
+                return em.merge(updatableMeal);
+            } else {
+                return null;
+            }
         }
     }
 
@@ -54,14 +49,8 @@ public class JpaMealRepository implements MealRepository {
 
     @Override
     public Meal get(int id, int userId) {
-        CriteriaBuilder builder = em.getCriteriaBuilder();
-        CriteriaQuery<Meal> criteriaQuery = builder.createQuery(Meal.class);
-        Root<Meal> mealRoot = criteriaQuery.from(Meal.class);
-        criteriaQuery.select(mealRoot)
-                .where(builder.equal(mealRoot.get("user").get("id"), userId), builder.equal(mealRoot.get("id"), id));
-        List<Meal> list = em.createQuery(criteriaQuery)
-                .getResultList();
-        return DataAccessUtils.singleResult(list);
+        Meal meal = em.find(Meal.class, id);
+        return meal == null || meal.getUser().getId() != userId ? null : meal;
     }
 
     @Override

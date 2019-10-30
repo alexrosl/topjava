@@ -1,8 +1,7 @@
 package ru.javawebinar.topjava.model;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -25,15 +24,15 @@ public class Meal extends AbstractBaseEntity {
     @Column(name = "date_time", nullable = false)
     private LocalDateTime dateTime;
 
-    @NotEmpty
     @Column(name = "description", nullable = false)
+    @Size(min = 1, max = 120, message = "Длина описания должны быть от 2-х до 120-и символов")
     private String description;
 
-    @NotNull
     @Column(name = "calories", nullable = false)
+    @Min(value = 10, message = "Колиество калорий должно быть между 10 и 5000")
+    @Max(value = 5000, message = "Колиество калорий должно быть между 10 и 5000")
     private int calories;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
