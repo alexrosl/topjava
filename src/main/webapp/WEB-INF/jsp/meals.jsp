@@ -28,7 +28,7 @@
             <dt><spring:message code="meal.endTime"/>:</dt>
             <dd><input type="time" name="endTime" value="${param.endTime}"></dd>
         </dl>
-        <button type="submit">Filter</button>
+        <button type="submit"><spring:message code="meal.filter"/></button>
     </form>
     <hr/>
     <a href="${pageContext.request.contextPath}/meals/create"><spring:message code="common.add"/></a>
@@ -54,8 +54,8 @@
                 </td>
                 <td>${meal.description}</td>
                 <td>${meal.calories}</td>
-                <td><a href="${pageContext.request.contextPath}/meals/update?id=${meal.id}">Update</a></td>
-                <td><a href="${pageContext.request.contextPath}/meals/delete?id=${meal.id}">Delete</a></td>
+                <td><a href="${pageContext.request.contextPath}/meals/update?id=${meal.id}"><spring:message code="common.update"/></a></td>
+                <td><a href="${pageContext.request.contextPath}/meals/delete?id=${meal.id}"><spring:message code="common.delete"/></a></td>
             </tr>
         </c:forEach>
     </table>
