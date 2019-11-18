@@ -7,9 +7,10 @@
 <body>
 <jsp:include page="fragments/bodyHeader.jsp"/>
 <section>
+    <jsp:useBean id="meal" type="ru.javawebinar.topjava.model.Meal" scope="request"/>
     <h2>
         <c:choose>
-            <c:when test="${action == 'create'}">
+            <c:when test="${meal.isNew()}">
                 <spring:message code="meal.create"/>
             </c:when>
             <c:otherwise>
@@ -17,8 +18,7 @@
             </c:otherwise>
         </c:choose>
     </h2>
-    <jsp:useBean id="meal" type="ru.javawebinar.topjava.model.Meal" scope="request"/>
-    <form method="post" action="${pageContext.request.contextPath}/meals/mealForm/save">
+    <form method="post" action="${pageContext.request.contextPath}/meals">
         <input type="hidden" name="id" value="${meal.id}">
         <dl>
             <dt><spring:message code="meal.dateTime"/>:</dt>

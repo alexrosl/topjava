@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 @Transactional(readOnly = true)
@@ -62,10 +63,9 @@ public class JdbcUserRepository implements UserRepository {
                         "registered=:registered, enabled=:enabled, calories_per_day=:caloriesPerDay WHERE id=:id", parameterSource) == 0) {
             return null;
         }
-        jdbcTemplate.update("delete from user_roles where user_id=?", user.getId());
-        /*for (Role r : user.getRoles()){
-            insertRoles.execute(Map.of("user_id",user.getId(), "role", r));
-        }*/
+        if (!user.isNew()) {
+            jdbcTemplate.update("delete from user_roles where user_id=?", user.getId());
+        }
         jdbcTemplate.batchUpdate("insert into user_roles (user_id, role) values (?, ?)",
                 new BatchPreparedStatementSetter() {
                     @Override
@@ -110,7 +110,7 @@ public class JdbcUserRepository implements UserRepository {
     private final class UserResultSetExtractor implements ResultSetExtractor<List<User>> {
         @Override
         public List<User> extractData(ResultSet rs) throws SQLException, DataAccessException {
-            Map<User, Set<Role>> map = new HashMap<>();
+            Map<User, Set<Role>> map = new LinkedHashMap<>();
             while (rs.next()) {
                 int id = rs.getInt("id");
                 String name = rs.getString("name");
@@ -121,14 +121,16 @@ public class JdbcUserRepository implements UserRepository {
                 Date registered = rs.getDate("registered");
                 User user = new User(id, name, email, password, caloriesPerDay, enabled, registered, null);
                 Role role = Role.valueOf(rs.getString("role"));
-                map.computeIfAbsent(user, u -> new HashSet<>()).add(role);
+                map.computeIfAbsent(user, u -> EnumSet.noneOf(Role.class)).add(role);
             }
-            List<User> users = new ArrayList<>();
-            for (Map.Entry<User, Set<Role>> entry : map.entrySet()) {
-                User user = entry.getKey();
-                user.setRoles(entry.getValue());
-                users.add(user);
-            }
+            List<User> users = map.entrySet()
+                    .stream()
+                    .map(e -> {
+                        User user = e.getKey();
+                        user.setRoles(e.getValue());
+                        return user;
+                    })
+                    .collect(Collectors.toList());
             return users;
         }
     }
