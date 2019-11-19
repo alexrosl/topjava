@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
@@ -25,8 +24,6 @@ import java.util.stream.Collectors;
 @Repository
 @Transactional(readOnly = true)
 public class JdbcUserRepository implements UserRepository {
-
-    private static final BeanPropertyRowMapper<User> ROW_MAPPER = BeanPropertyRowMapper.newInstance(User.class);
 
     private final UserResultSetExtractor userExtractor = new UserResultSetExtractor();
 
@@ -62,8 +59,7 @@ public class JdbcUserRepository implements UserRepository {
                 "UPDATE users SET name=:name, email=:email, password=:password, " +
                         "registered=:registered, enabled=:enabled, calories_per_day=:caloriesPerDay WHERE id=:id", parameterSource) == 0) {
             return null;
-        }
-        if (!user.isNew()) {
+        } else {
             jdbcTemplate.update("delete from user_roles where user_id=?", user.getId());
         }
         jdbcTemplate.batchUpdate("insert into user_roles (user_id, role) values (?, ?)",
@@ -123,7 +119,7 @@ public class JdbcUserRepository implements UserRepository {
                 Role role = Role.valueOf(rs.getString("role"));
                 map.computeIfAbsent(user, u -> EnumSet.noneOf(Role.class)).add(role);
             }
-            List<User> users = map.entrySet()
+            return map.entrySet()
                     .stream()
                     .map(e -> {
                         User user = e.getKey();
@@ -131,7 +127,6 @@ public class JdbcUserRepository implements UserRepository {
                         return user;
                     })
                     .collect(Collectors.toList());
-            return users;
         }
     }
 
