@@ -22,12 +22,6 @@ public class MealsUtil {
         return getFiltered(meals, caloriesPerDay, meal -> true);
     }
 
-    public static List<Meal> getCommonMeals(Collection<MealTo> mealTos) {
-        return mealTos.stream()
-                .map(MealsUtil::createMeal)
-                .collect(Collectors.toList());
-    }
-
     public static List<MealTo> getFilteredTos(Collection<Meal> meals, int caloriesPerDay, @Nullable LocalTime startTime, @Nullable LocalTime endTime) {
         return getFiltered(meals, caloriesPerDay, meal -> Util.isBetweenInclusive(meal.getTime(), startTime, endTime));
     }

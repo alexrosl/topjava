@@ -13,7 +13,7 @@ public class MealTo {
 
     private boolean excess;
 
-    public MealTo(){
+    public MealTo() {
         super();
     }
 
@@ -63,6 +63,16 @@ public class MealTo {
 
     public void setExcess(boolean excess) {
         this.excess = excess;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        MealTo mealTo = (MealTo) obj;
+        return id.equals(mealTo.getId())
+                && dateTime.equals(mealTo.getDateTime())
+                && calories == mealTo.getCalories()
+                && excess == mealTo.isExcess()
+                && description.equals(mealTo.getDescription());
     }
 
     @Override

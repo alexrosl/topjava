@@ -14,8 +14,7 @@ import ru.javawebinar.topjava.web.meal.MealRestController;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static ru.javawebinar.topjava.MealTestData.*;
 import static ru.javawebinar.topjava.TestUtil.readFromJson;
 import static ru.javawebinar.topjava.UserTestData.USER_ID;
@@ -75,7 +74,7 @@ public class MealRestControllerTest extends AbstractControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get(REST_URL))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(contentJson(MEALS));
+                .andExpect(contentJson(MEALS_TO));
     }
 
 
@@ -84,7 +83,7 @@ public class MealRestControllerTest extends AbstractControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get(REST_URL+"/filter?dateFrom=2015-05-30&dateTo=2015-05-30"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(contentJson(MEAL3, MEAL2, MEAL1));
+                .andExpect(contentJson(MEAL_TO3, MEAL_TO2, MEAL_TO1));
     }
 
     @Test
@@ -92,6 +91,6 @@ public class MealRestControllerTest extends AbstractControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get(REST_URL+"/filter"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(contentJson(MEALS));
+                .andExpect(contentJson(MEALS_TO));
     }
 }

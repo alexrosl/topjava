@@ -3,7 +3,6 @@ package ru.javawebinar.topjava;
 import org.springframework.test.web.servlet.ResultMatcher;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.to.MealTo;
-import ru.javawebinar.topjava.util.MealsUtil;
 
 import java.time.Month;
 import java.util.List;
@@ -28,7 +27,17 @@ public class MealTestData {
     public static final Meal ADMIN_MEAL1 = new Meal(ADMIN_MEAL_ID, of(2015, Month.JUNE, 1, 14, 0), "Админ ланч", 510);
     public static final Meal ADMIN_MEAL2 = new Meal(ADMIN_MEAL_ID + 1, of(2015, Month.JUNE, 1, 21, 0), "Админ ужин", 1500);
 
+    public static final MealTo MEAL_TO1 = new MealTo(MEAL1.getId(), MEAL1.getDateTime(), MEAL1.getDescription(), MEAL1.getCalories(), false);
+    public static final MealTo MEAL_TO2 = new MealTo(MEAL2.getId(), MEAL2.getDateTime(), MEAL2.getDescription(), MEAL2.getCalories(), false);
+    public static final MealTo MEAL_TO3 = new MealTo(MEAL3.getId(), MEAL3.getDateTime(), MEAL3.getDescription(), MEAL3.getCalories(), false);
+    public static final MealTo MEAL_TO4 = new MealTo(MEAL4.getId(), MEAL4.getDateTime(), MEAL4.getDescription(), MEAL4.getCalories(), true);
+    public static final MealTo MEAL_TO5 = new MealTo(MEAL5.getId(), MEAL5.getDateTime(), MEAL5.getDescription(), MEAL5.getCalories(), true);
+    public static final MealTo MEAL_TO6 = new MealTo(MEAL6.getId(), MEAL6.getDateTime(), MEAL6.getDescription(), MEAL6.getCalories(), true);
+    public static final MealTo MEAL_TO7 = new MealTo(MEAL7.getId(), MEAL7.getDateTime(), MEAL7.getDescription(), MEAL7.getCalories(), true);
+
     public static final List<Meal> MEALS = List.of(MEAL7, MEAL6, MEAL5, MEAL4, MEAL3, MEAL2, MEAL1);
+
+    public static final List<MealTo> MEALS_TO = List.of(MEAL_TO7, MEAL_TO6, MEAL_TO5, MEAL_TO4, MEAL_TO3, MEAL_TO2, MEAL_TO1);
 
     public static Meal getNew() {
         return new Meal(null, of(2015, Month.JUNE, 1, 18, 0), "Созданный ужин", 300);
@@ -50,12 +59,12 @@ public class MealTestData {
         assertThat(actual).usingElementComparatorIgnoringFields("user").isEqualTo(expected);
     }
 
-    public static ResultMatcher contentJson(Meal... expected) {
+    public static ResultMatcher contentJson(MealTo... expected) {
         return contentJson(List.of(expected));
     }
 
-    public static ResultMatcher contentJson(List<Meal> expected) {
-        return result -> assertMatch(MealsUtil.getCommonMeals(readListFromJsonMvcResult(result, MealTo.class)), expected);
+    public static ResultMatcher contentJson(List<MealTo> expected) {
+        return result -> assertThat(readListFromJsonMvcResult(result, MealTo.class)).isEqualTo(expected);
     }
 
     public static ResultMatcher contentJson(Meal expected) {
