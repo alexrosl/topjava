@@ -17,7 +17,7 @@
                 <div class="row">
                     <div class="offset-1 col-2">
                         <label for="startDate"><spring:message code="meal.startDate"/></label>
-                        <input id="startDate" class="form-control" type="date" value="${param.startDate}">
+                        <input id="startDate" class="form-control" type="datetime-local" value="${param.startDate}">
                     </div>
                     <div class="col-2">
                         <label for="endDate"><spring:message code="meal.endDate"/></label>
