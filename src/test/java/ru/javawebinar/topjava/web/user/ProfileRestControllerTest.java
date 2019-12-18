@@ -62,6 +62,15 @@ class ProfileRestControllerTest extends AbstractControllerTest {
     }
 
     @Test
+    void registerDublicateEmail() throws Exception {
+        UserTo newTo = new UserTo(null, "newName", USER.getEmail(), "newPassword", 1500);
+        User newUser = UserUtil.createNewFromTo(newTo);
+        ResultActions action = perform(doPost("/register").jsonBody(newTo))
+                .andDo(print())
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
     void update() throws Exception {
         UserTo updatedTo = new UserTo(null, "newName", "newemail@ya.ru", "newPassword", 1500);
         perform(doPut().jsonBody(updatedTo).basicAuth(USER))
@@ -74,6 +83,14 @@ class ProfileRestControllerTest extends AbstractControllerTest {
     @Test
     void updateNotValid() throws Exception {
         UserTo updatedTo = new UserTo(null, "newName", "newemail@ya.ru", "ne", 1500);
+        perform(doPut().jsonBody(updatedTo).basicAuth(USER))
+                .andDo(print())
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    void updateDublicateEmail() throws Exception {
+        UserTo updatedTo = new UserTo(null, "newName", ADMIN.getEmail(), "ne", 1500);
         perform(doPut().jsonBody(updatedTo).basicAuth(USER))
                 .andDo(print())
                 .andExpect(status().isUnprocessableEntity());

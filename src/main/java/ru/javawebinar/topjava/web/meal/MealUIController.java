@@ -40,9 +40,6 @@ public class MealUIController extends AbstractMealController {
     @PostMapping
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void createOrUpdate(@Valid Meal meal, BindingResult result, SessionStatus status, ModelMap model) {
-        if (result.hasErrors()) {
-            model.addAttribute("meal", meal);
-        }
         if (meal.isNew()) {
             super.create(meal);
         } else {

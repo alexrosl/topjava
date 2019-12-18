@@ -22,8 +22,9 @@ public class GlobalExceptionHandler {
         Throwable rootCause = ValidationUtil.getRootCause(e);
 
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        String causeMsg = ValidationUtil.getRootCauseCustomMessage(rootCause);
         ModelAndView mav = new ModelAndView("exception",
-                Map.of("exception", rootCause, "message", rootCause.toString(), "status", httpStatus));
+                Map.of("exception", rootCause, "message", causeMsg, "status", httpStatus));
         mav.setStatus(httpStatus);
 
         // Interceptor is not invoked, put userTo

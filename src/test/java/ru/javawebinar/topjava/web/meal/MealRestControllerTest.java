@@ -13,8 +13,7 @@ import ru.javawebinar.topjava.web.AbstractControllerTest;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static ru.javawebinar.topjava.MealTestData.*;
 import static ru.javawebinar.topjava.TestUtil.readFromJson;
 import static ru.javawebinar.topjava.TestUtil.readFromJsonMvcResult;
@@ -81,6 +80,14 @@ class MealRestControllerTest extends AbstractControllerTest {
     void updateNotValid() throws Exception {
         Meal updated = MealTestData.getUpdated();
         updated.setCalories(2);
+        perform(doPut(MEAL1_ID).jsonBody(updated).basicAuth(USER))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    void updateWithDublicateDateTime() throws Exception {
+        Meal updated = MealTestData.getUpdated();
+        updated.setDateTime(MEAL2.getDateTime());
         perform(doPut(MEAL1_ID).jsonBody(updated).basicAuth(USER))
                 .andExpect(status().isUnprocessableEntity());
     }

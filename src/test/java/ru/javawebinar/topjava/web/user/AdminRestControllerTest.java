@@ -8,6 +8,8 @@ import ru.javawebinar.topjava.TestUtil;
 import ru.javawebinar.topjava.UserTestData;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.service.UserService;
+import ru.javawebinar.topjava.to.UserTo;
+import ru.javawebinar.topjava.util.UserUtil;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 import ru.javawebinar.topjava.web.AbstractControllerTest;
 
@@ -82,6 +84,8 @@ class AdminRestControllerTest extends AbstractControllerTest {
     @Test
     void update() throws Exception {
         User updated = UserTestData.getUpdated();
+        updated.setEmail(updated.getEmail() + "q");
+        updated.setPassword("password");
         perform(doPut(USER_ID).jsonBody(updated).basicAuth(ADMIN))
                 .andExpect(status().isNoContent());
 
@@ -97,6 +101,16 @@ class AdminRestControllerTest extends AbstractControllerTest {
     }
 
     @Test
+    void updateDublicateEmail() throws Exception {
+        User updated = UserTestData.getUpdated();
+        updated.setEmail("password");
+        updated.setEmail(ADMIN.getEmail());
+        UserTo updatedUserTo = UserUtil.asTo(updated);
+        perform(doPut(USER_ID).jsonBody(updatedUserTo).basicAuth(ADMIN))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
     void createWithLocation() throws Exception {
         User newUser = UserTestData.getNew();
         ResultActions action = perform(doPost().jsonUserWithPassword(newUser).basicAuth(ADMIN))
@@ -107,6 +121,14 @@ class AdminRestControllerTest extends AbstractControllerTest {
         newUser.setId(newId);
         USER_MATCHERS.assertMatch(created, newUser);
         USER_MATCHERS.assertMatch(userService.get(newId), newUser);
+    }
+
+    @Test
+    void createWithDublicateEmail() throws Exception {
+        User newUser = UserTestData.getNew();
+        newUser.setEmail(USER.getEmail());
+        ResultActions action = perform(doPost().jsonUserWithPassword(newUser).basicAuth(ADMIN))
+                .andExpect(status().isUnprocessableEntity());
     }
 
     @Test

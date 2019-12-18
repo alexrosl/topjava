@@ -12,13 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import ru.javawebinar.topjava.AuthorizedUser;
-import ru.javawebinar.topjava.HasId;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
 import ru.javawebinar.topjava.to.UserTo;
 import ru.javawebinar.topjava.util.UserUtil;
-import ru.javawebinar.topjava.util.exception.DublicateEmailException;
-import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.util.List;
 
@@ -43,7 +40,6 @@ public class UserService implements UserDetailsService {
     @CacheEvict(value = "users", allEntries = true)
     public User create(User user) {
         Assert.notNull(user, "user must not be null");
-        checkUniqueEmail(user.getEmail(), user.getId());
         return prepareAndSave(user);
     }
 
@@ -70,14 +66,12 @@ public class UserService implements UserDetailsService {
     public void update(User user) {
         Assert.notNull(user, "user must not be null");
 //      checkNotFoundWithId : check works only for JDBC, disabled
-        checkUniqueEmail(user.getEmail(), user.getId());
         prepareAndSave(user);
     }
 
     @CacheEvict(value = "users", allEntries = true)
     @Transactional
     public void update(UserTo userTo) {
-        checkUniqueEmail(userTo.getEmail(), userTo.getId());
         User user = get(userTo.id());
         prepareAndSave(UserUtil.updateFromTo(user, userTo));
     }
@@ -103,18 +97,7 @@ public class UserService implements UserDetailsService {
         return repository.save(prepareToSave(user, passwordEncoder));
     }
 
-    private void checkUniqueEmail(String email, Integer id) {
-        try {
-            HasId userFromBase = getByEmail(email.toLowerCase());
-            if (userFromBase.getId() !=id){
-                throw new DublicateEmailException("User with this email already exists");
-            }
-        } catch (NotFoundException nfe){
-            nfe.printStackTrace();
-        }
-    }
-
-    public User getWithMeals(int id) {
+   public User getWithMeals(int id) {
         return checkNotFoundWithId(repository.getWithMeals(id), id);
     }
 }

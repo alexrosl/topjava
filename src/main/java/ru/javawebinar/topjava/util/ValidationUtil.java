@@ -1,5 +1,6 @@
 package ru.javawebinar.topjava.util;
 
+import org.postgresql.util.PSQLException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import ru.javawebinar.topjava.HasId;
@@ -58,6 +59,32 @@ public class ValidationUtil {
             result = cause;
         }
         return result;
+    }
+
+    public static String getRootCauseCustomMessage(Throwable rootCause) {
+        String causeMsg;
+        if (rootCause instanceof ConstraintViolationException) {
+            StringBuilder builder = new StringBuilder();
+            ((ConstraintViolationException) rootCause)
+                    .getConstraintViolations()
+                    .forEach(cv -> builder.append(cv.getPropertyPath())
+                            .append(" ")
+                            .append(cv.getMessage())
+                            .append("\n"));
+            causeMsg = builder.toString();
+        } else if (rootCause instanceof PSQLException) {
+            PSQLException psqlException = (PSQLException) rootCause;
+            if ("users_unique_email_idx".equalsIgnoreCase(psqlException.getServerErrorMessage().getConstraint())) {
+                causeMsg = "User with this email already exists";
+            } else if ("meals_unique_user_datetime_idx".equalsIgnoreCase(psqlException.getServerErrorMessage().getConstraint())) {
+                causeMsg = "Meal with this dateTime already exists";
+            } else {
+                causeMsg = rootCause.toString();
+            }
+        } else {
+            causeMsg = rootCause.toString();
+        }
+        return causeMsg;
     }
 
     private static final Validator validator;

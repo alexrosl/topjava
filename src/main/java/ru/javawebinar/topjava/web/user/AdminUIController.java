@@ -37,15 +37,11 @@ public class AdminUIController extends AbstractUserController {
 
     @PostMapping
     public void createOrUpdate(@Valid UserTo userTo, BindingResult result, SessionStatus status, ModelMap model) {
-        if (result.hasErrors()) {
-            model.addAttribute("userTo", userTo);
-        }
         if (userTo.isNew()) {
             super.create(userTo);
         } else {
             super.update(userTo, userTo.id());
         }
-        status.setComplete();
     }
 
     @Override
